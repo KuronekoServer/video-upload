@@ -34,6 +34,17 @@
 document.getElementById('uploadForm').addEventListener('submit', (e) => {
     e.preventDefault();
 
+    const videoInput = document.getElementById('video');
+    if (videoInput.files.length > 0) {
+        const fileSize = videoInput.files[0].size;
+        const maxFileSize = 100 * 1024 * 1024; // 100MB
+
+        if (fileSize > maxFileSize) {
+            alert('ファイルサイズが100MBを超えています。アップロードできません。');
+            return;
+        }
+    }
+
     const formData = new FormData(e.target);
     const xhr = new XMLHttpRequest();
 
@@ -46,6 +57,14 @@ document.getElementById('uploadForm').addEventListener('submit', (e) => {
             progressBar.style.width = percentComplete + '%';
             progressBar.setAttribute('aria-valuenow', percentComplete);
         }
+    };
+
+    xhr.onloadstart = () => {
+        document.querySelector('.progress').style.display = 'block';
+    };
+
+    xhr.onloadend = () => {
+        document.querySelector('.progress').style.display = 'none';
     };
 
     xhr.onload = () => {
@@ -65,15 +84,13 @@ document.getElementById('uploadForm').addEventListener('submit', (e) => {
                     console.error('クリップボードにコピーできませんでした:', err);
                 });
             });
-            // 進捗バーをリセット
-            document.getElementById('progressBar').style.width = '0%';
         } else {
-            document.getElementById('result').innerHTML = `<div class="alert alert-danger">エラーが発生しました。</div>`;
+            document.getElementById('result').innerHTML = `<div class="alert alert-danger">エラーが発生しました: ${xhr.responseText}</div>`;
         }
     };
 
     xhr.onerror = () => {
-        document.getElementById('result').innerHTML = `<div class="alert alert-danger">エラーが発生しました。</div>`;
+        document.getElementById('result').innerHTML = `<div class="alert alert-danger">アップロードに失敗しました。サーバーに問題があります。</div>`;
     };
 
     xhr.send(formData);
