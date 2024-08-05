@@ -37,7 +37,20 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             body: formData,
         });
         const result = await response.json();
-        document.getElementById('result').innerHTML = `<div class="alert alert-success">アップロード成功: <a href="${result.url}" target="_blank">ビデオを見る</a></div>`;
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `
+            <div class="alert alert-success">
+                アップロード成功: <a href="${result.url}" target="_blank">ビデオを見る</a>
+                <button id="copyButton" class="btn btn-secondary btn-sm">URLをコピー</button>
+            </div>
+        `;
+        document.getElementById('copyButton').addEventListener('click', () => {
+            navigator.clipboard.writeText(result.url).then(() => {
+                alert('URLがクリップボードにコピーされました');
+            }).catch(err => {
+                console.error('クリップボードにコピーできませんでした:', err);
+            });
+        });
     } catch (error) {
         document.getElementById('result').innerHTML = `<div class="alert alert-danger">エラーが発生しました。</div>`;
     }
